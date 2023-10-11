@@ -31,7 +31,7 @@ spec:
             - name: PORT
               value: "30007"
             - name: POSTGRES_DB
-              value: postgres
+              value: odoo-db
             - name: POSTGRES_USER
               value: odoo
             - name: POSTGRES_PASSWORD
@@ -39,6 +39,10 @@ spec:
           volumeMounts:
             - mountPath: "/mnt/extra-addons"
               name: pvc-odoo-addons
+            - mountPath: "/etc/odoo"
+              name: pvc-odoo-config
+            - mountPath: "/var/lib/odoo"
+              name: pvc-odoo-web-data
 
   volumeClaimTemplates:
     - metadata:
@@ -49,5 +53,27 @@ spec:
         resources:
           requests:
             storage: 2Gi
-        storageClassName: hostpath
+        storageClassName: storageclass-odoo
+        volumeName: pv-addons
 
+    - metadata:
+        name: pvc-odoo-config
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: storageclass-odoo
+        volumeName: pv-config
+
+    - metadata:
+        name: pvc-odoo-web-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: storageclass-odoo
+        volumeName: pv-web-data
