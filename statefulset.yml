@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: odoo-statefulset
+  labels:
+    app: odoo-app
+spec:
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: odoo-app
+  template:
+    metadata:
+      name: odoo-pod
+      labels:
+        app: odoo-app
+    spec:
+      containers:
+        - name: odoo-container
+          image: odoo:16
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8069
+          env:
+            - name: HOST
+              value: postgres.local
+            - name: PORT
+              value: "30007"
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              value: odoo
+            - name: POSTGRES_PASSWORD
+              value: odoo
+          volumeMounts:
+            - mountPath: "/mnt/extra-addons"
+              name: pvc-odoo-addons
+
+  volumeClaimTemplates:
+    - metadata:
+        name: pvc-odoo-addons
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: hostpath
+
